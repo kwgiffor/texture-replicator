@@ -1,7 +1,7 @@
 """Tests for 'texture-replicator'"""
 import pytest
 import os
-from texture_replicator import texture_replicator
+from texture_replicator import replicator as texture_replicator
 
 DUPLICATES_FOLDER = "./tests/duplicates/"
 
