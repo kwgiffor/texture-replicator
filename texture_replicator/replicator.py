@@ -3,7 +3,7 @@ import shutil
 from PIL import Image
 
 
-def replicate(image, destination):
+def replicate(image: str, destination: str, imageoverride:str = None):
     """
     Copy an image to a designated destination folder
     Args:
