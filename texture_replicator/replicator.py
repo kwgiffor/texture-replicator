@@ -58,11 +58,15 @@ def replicate(image: str, destination: str, imageoverride:str = None):
 
     # Copy Image to new path
     if (imageoverride == None):
-        output = img.copy()
+        output = img
         output.save(new_image_path)
         print(image, "has been successfully replicated in", destination)
     else:
-        output = img_override.copy()
+        output = img_override
         output = output.resize(img.size)
         output.save(new_image_path)
         print(image, "has been successfully replicated in", destination, "and has been overriden by", imageoverride)
+
+    # Close open images
+    img.close()
+    output.close()

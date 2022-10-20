@@ -25,35 +25,24 @@ def clear_duplicates():
 
 
 ################ TODO: find a way to accurately compare image files #######################
-# def are_image_contents_equal(img1: Image.Image, img2: Image.Image) -> bool:
-#     """Converts both images to 'RGB' mode and checks for content equivilency"""
+def are_image_contents_equal(img1: Image.Image, img2: Image.Image) -> bool:
+    """Converts both images to 'RGB' mode and checks for content equivilency"""
 
-#     # # Check alpha values
-#     # if img1.mode == img2.mode == "RGBA":
-#     #     img1_alphas = [pixel[3] for pixel in img1.getdata()]
-#     #     img2_alphas = [pixel[3] for pixel in img2.getdata()]
-#     #     equal_alphas = img1_alphas == img2_alphas
-#     # else:
-#     #     equal_alphas = True
+    # Check pixel differences
+    dif = ImageChops.difference(img1.convert("RGB"), img2.convert("RGB"))
+    equal_pixels = not dif.getbbox()
 
-#     # # Check pixel differences
-#     # dif = ImageChops.difference(img1.convert("RGB"), img2.convert("RGB"))
-#     # dif.show()
-#     # equal_pixels = not dif.getbbox()
-#     translucent = Image.new("RGB", img1.size, (255, 0, 0))
-#     mask = ImageChops.difference(img1, img2).convert("L").point(lambda x: 127 if x else 0)
-#     img2.paste(translucent, (0, 0), mask)
-
-#     mask.show()
-
-#     return not img2## equal_alphas and equal_pixels
+    img1.close()
+    img2.close()
+    
+    return equal_pixels
 
 
 @pytest.mark.parametrize(
     "image_path, destination_path",
     [
-        ("tests/image.jpg", "tests/duplicates/"),
-        ("./tests/image.jpg", "./tests/duplicates/"),
+        ("tests/image.png", "tests/duplicates/"),
+        ("./tests/image.png", "./tests/duplicates/"),
     ],
 )
 def test_replicate_replicatesImageInDefinedDirectory(image_path, destination_path):
@@ -81,45 +70,45 @@ def test_replicate_replicatesImageInDefinedDirectory(image_path, destination_pat
     clear_duplicates()
 
 
-# @pytest.mark.parametrize(
-#     "image_path, destination_path",
-#     [
-#         ("tests/image.jpg", "tests/duplicates/"),
-#         ("./tests/image.jpg", "./tests/duplicates/"),
-#     ],
-# )
-# def test_replicate_replicatesCorrectImageInDefinedDirectory(image_path, destination_path):
-#     """Correctly replicates image in defined directory"""
+@pytest.mark.parametrize(
+    "image_path, destination_path",
+    [
+        ("tests/image.png", "tests/duplicates/"),
+        ("./tests/image.png", "./tests/duplicates/"),
+    ],
+)
+def test_replicate_replicatesCorrectImageInDefinedDirectory(image_path, destination_path):
+    """Correctly replicates image in defined directory"""
 
-#     ### Set Up
-#     clear_duplicates()
+    ### Set Up
+    clear_duplicates()
 
-#     image_abs_path = os.path.abspath(image_path)
-#     destination_abs_path = os.path.abspath(destination_path)
+    image_abs_path = os.path.abspath(image_path)
+    destination_abs_path = os.path.abspath(destination_path)
 
-#     file_name = image_abs_path.split("\\")[-1]
-#     expected_image_path = os.path.join(destination_abs_path, file_name)
+    file_name = image_abs_path.split("\\")[-1]
+    expected_image_path = os.path.join(destination_abs_path, file_name)
 
-#     ### Act
-#     texture_replicator.replicate(image_path, destination_path)
+    ### Act
+    texture_replicator.replicate(image_path, destination_path)
 
-#     ### Assert
-#     expected = Image.open(image_abs_path)
-#     output = Image.open(expected_image_path)
+    ### Assert
+    expected = Image.open(image_abs_path)
+    output = Image.open(expected_image_path)
 
-#     assert expected.size == output.size
-#     assert expected.format == expected.format
-#     assert are_image_contents_equal(expected, output)
+    assert expected.size == output.size
+    assert expected.format == expected.format
+    assert are_image_contents_equal(expected, output)
 
-#     ### Tear Down
-#     clear_duplicates()
+    ### Tear Down
+    clear_duplicates()
 
 
 @pytest.mark.parametrize(
     "image_path, destination_path",
     [
         ("image.tiff", "tests/duplicates/"),
-        ("./tests/image.png", ".tests/duplicates/"),
+        ("./tests/image.jpg", "./tests/duplicates/"),
     ],
 )
 def test_replicate_image_notAFile_raiseFileNotFoundError(image_path, destination_path):
@@ -139,8 +128,8 @@ def test_replicate_image_notAFile_raiseFileNotFoundError(image_path, destination
 @pytest.mark.parametrize(
     "image_path, destination_path",
     [
-        ("tests/image.jpg", "tests/override.txt"),
-        ("./tests/image.jpg", ".tests/override.jpg"),
+        ("tests/image.png", "tests/override.txt"),
+        ("./tests/image.png", ".tests/override.jpg"),
     ],
 )
 def test_replicate_destination_notAFolder_raiseNotADirectoryError(
@@ -161,8 +150,8 @@ def test_replicate_destination_notAFolder_raiseNotADirectoryError(
 @pytest.mark.parametrize(
     "image_path, destination_path",
     [
-        ("tests/image.jpg", "tests/duplicates/"),
-        ("./tests/image.jpg", "./tests/duplicates/"),
+        ("tests/image.png", "tests/duplicates/"),
+        ("./tests/image.png", "./tests/duplicates/"),
     ],
 )
 def test_replicate_destination_folderContainsFileWithImageName_raiseFileExistsError(
@@ -190,8 +179,8 @@ def test_replicate_destination_folderContainsFileWithImageName_raiseFileExistsEr
 @pytest.mark.parametrize(
     "image_path, destination_path, imageoverride_path",
     [
-        ("tests/image.jpg", "tests/duplicates/", "tests/override.png"),
-        ("./tests/image.jpg", "./tests/duplicates/", "./tests/override.png"),
+        ("tests/image.png", "tests/duplicates/", "tests/override.png"),
+        ("./tests/image.png", "./tests/duplicates/", "./tests/override.png"),
     ],
 )
 def test_replicate_imageoverride_createsAReplicaOfImageWithCorrectFormatAndSize(
@@ -222,20 +211,27 @@ def test_replicate_imageoverride_createsAReplicaOfImageWithCorrectFormatAndSize(
     baseImage = Image.open(image_abs_path)
     overrideImage = Image.open(imageoverride_abs_path)
     outputImage = Image.open(expected_output_path)
+    expectedImage = overrideImage.resize(baseImage.size)
 
     ###### Check format and size
     assert baseImage.format == outputImage.format
     assert baseImage.size == outputImage.size
 
+    assert are_image_contents_equal(expectedImage, outputImage) 
+
+    baseImage.close()
+    overrideImage.close()
+    outputImage.close()
+
     ### Tear Down
-    #clear_duplicates()
+    clear_duplicates()
 
 
 @pytest.mark.parametrize(
     "image_path, destination_path, imageoverride_path",
     [
-        ("tests/image.jpg", "tests/duplicates/", "override.jpg"),
-        ("./tests/image.jpg", "./tests/duplicates/", "./tests/override.jpg"),
+        ("tests/image.png", "tests/duplicates/", "override.jpg"),
+        ("./tests/image.png", "./tests/duplicates/", "./tests/override.jpg"),
     ],
 )
 def test_replicate_overrideimage_notAFile_raiseFileNotFoundError(
