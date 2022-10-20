@@ -1,3 +1,4 @@
+from genericpath import isfile
 import os
 import shutil
 from PIL import Image
@@ -15,12 +16,18 @@ def replicate(image: str, destination: str, imageoverride:str = None):
     # Verify image points to a file
     image_abs_path = os.path.abspath(image)
     if os.path.isfile(image_abs_path) != True:
-        raise FileNotFoundError("image must point to a valid file")
+        raise FileNotFoundError("image must point to a valid file: " + image_abs_path)
 
     # Verify destination points to a folder
     destination_abs_path = os.path.abspath(destination)
     if os.path.isdir(destination_abs_path) != True:
-        raise NotADirectoryError("destination must point to a valid directory folder")
+        raise NotADirectoryError("destination must point to a valid directory folder: " + destination_abs_path)
+
+    # If imageOverride is not none, verify override is an Image
+    if imageoverride != None:
+        imgoverride_abs_path = os.path.abspath(imageoverride)
+        if os.path.isfile(imgoverride_abs_path) != True:
+            raise FileNotFoundError("imageoverride must point to a valid file: " + imgoverride_abs_path)
 
     # Verify image does not exist in destination folder
     image_file_name = image.split("/")[-1]
@@ -32,16 +39,30 @@ def replicate(image: str, destination: str, imageoverride:str = None):
             + " already exists in "
             + destination
         ) 
-
-    # Open Image
+    
+    # Verify image is an Image
     try:
         img = Image.open(image_abs_path)
     except Exception as e:
-        raise ValueError(image + "is not a valid image")
+        raise ValueError(image + "is not a valid image: " + image_abs_path)
+
+    # Verify override is an image
+    if imageoverride != None:
+        try:
+            img_override = Image.open(imgoverride_abs_path)
+        except Exception as e:
+            raise ValueError(imageoverride + "is not a valid image: " + imgoverride_abs_path)
+    
 
     print("Copying ", image_abs_path, " to ", destination_abs_path)
 
     # Copy Image to new path
-    shutil.copy(image_abs_path, destination_abs_path)
-
-    print(image, "has been successfully replicated in", destination)
+    if (imageoverride == None):
+        output = img.copy()
+        output.save(new_image_path)
+        print(image, "has been successfully replicated in", destination)
+    else:
+        output = img_override.copy()
+        output = output.resize(img.size)
+        output.save(new_image_path)
+        print(image, "has been successfully replicated in", destination, "and has been overriden by", imageoverride)
